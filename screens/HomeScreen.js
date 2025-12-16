@@ -1,39 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  FlatList,
-  SafeAreaView,
-  Modal,
-  ActivityIndicator,
-  StatusBar,
-  Platform,
+  View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, 
+  SafeAreaView, Modal, ActivityIndicator, StatusBar, Platform,
 } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext'; // IMPORT
 
-// --- RETRO THEME CONFIG ---
 const THEME = {
-  bg: '#F2F0E9',         // Vintage Paper
-  card: '#FFFFFF',       // Stark White
-  text: '#000000',       // Pure Black
-  border: '#000000',     // Borders
-  accent: '#FF5722',     // Retro Orange
-  accentSecondary: '#4CAF50', // Retro Green
-  muted: '#757575',
-  font: Platform.OS === 'ios' ? 'Courier' : 'monospace', // Typewriter feel
+  bg: '#F2F0E9',
+  card: '#FFFFFF',
+  text: '#000000',
+  border: '#000000',
+  accent: '#FF5722',
+  font: Platform.OS === 'ios' ? 'Courier' : 'monospace',
 };
 
-// 1. ADDED 'navigation' PROP HERE
 export default function HomeScreen({ navigation }) {
+  const { user } = useAuth(); // GET USER STATE
+
   const [searchText, setSearchText] = useState('');
   const [theses, setTheses] = useState([]);
   const [loading, setLoading] = useState(false);
   
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
-  
   const [selectedType, setSelectedType] = useState('All');
   const [selectedLanguage, setSelectedLanguage] = useState('All');
   const [selectedYear, setSelectedYear] = useState('');
@@ -41,7 +30,6 @@ export default function HomeScreen({ navigation }) {
   const fetchTheses = async () => {
     setLoading(true);
     try {
-      // ENSURE THIS IP MATCHES YOUR SERVER
       let url = `http://10.225.126.1:3000/api/theses?`;
       if (searchText) url += `search=${encodeURIComponent(searchText)}&`;
       if (selectedType !== 'All') url += `type=${encodeURIComponent(selectedType)}&`;
@@ -66,9 +54,7 @@ export default function HomeScreen({ navigation }) {
     return () => clearTimeout(delayDebounceFn);
   }, [searchText, selectedType, selectedLanguage, selectedYear]);
 
-  // --- LIST ITEM COMPONENT ---
   const renderThesisItem = ({ item }) => (
-    // 2. ADDED TOUCHABLE WRAPPER FOR NAVIGATION
     <TouchableOpacity 
       activeOpacity={0.9}
       onPress={() => navigation.navigate('ThesisDetail', { thesis: item })}
@@ -76,7 +62,6 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View style={styles.badgeContainer}>
-              {/* Retro Badge: Boxy with border */}
               <View style={[styles.badge, { backgroundColor: THEME.accent }]}>
                   <Text style={[styles.badgeText, { color: '#FFF' }]}>{item.type}</Text>
               </View>
@@ -89,7 +74,6 @@ export default function HomeScreen({ navigation }) {
 
         <Text style={styles.cardTitle}>{item.title.toUpperCase()}</Text>
         
-        {/* Dashed Line Divider Simulation */}
         <View style={styles.cardDivider}>
           <Text numberOfLines={1} ellipsizeMode="clip" style={{color: THEME.border, letterSpacing: 3}}>
             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -122,12 +106,18 @@ export default function HomeScreen({ navigation }) {
         {/* --- HEADER --- */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>GTS</Text>
-            <Text style={styles.headerSubtitle}>{'>'} ACCESSING ACADEMIC DATABASE</Text>
+            <Text style={styles.headerTitle}>GTS_PORTAL_V1</Text>
+            <Text style={styles.headerSubtitle}>
+               {user ? `> USER: ${user.name.toUpperCase()}` : '> ACCESSING DATABASE_'}
+            </Text>
           </View>
-          <View style={styles.avatarContainer}>
+          {/* AVATAR BUTTON -> GOES TO PROFILE */}
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={() => navigation.navigate('Profile')}
+          >
              <Ionicons name="person" size={20} color="#000" />
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* --- SEARCH --- */}
@@ -151,7 +141,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* --- LIST AREA --- */}
         <View style={styles.listWrapper}> 
           {loading ? (
             <ActivityIndicator size="large" color="#000" style={{marginTop: 50}} />
@@ -167,14 +156,13 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.emptyState}>
                     <Ionicons name="folder-open-outline" size={48} color="#000" />
                     <Text style={styles.emptyText}>NO_DATA_FOUND</Text>
-                    <Text style={styles.emptySubText}>CHECK_FILTERS</Text>
                 </View>
               }
             />
           )}
         </View>
 
-        {/* --- MODAL --- */}
+        {/* --- MODAL CODE REMAINS SAME AS PREVIOUS --- */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -261,8 +249,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     height: '100%' 
   },
-  
-  // --- RETRO HEADER ---
   header: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
@@ -271,7 +257,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#000',
     paddingBottom: 15,
-    borderStyle: 'dashed' // Dashed line header
+    borderStyle: 'dashed' 
   },
   headerTitle: { 
     fontSize: 22, 
@@ -294,12 +280,9 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
-    // Hard Shadow
     borderBottomWidth: 4,
     borderRightWidth: 4,
   },
-
-  // --- RETRO SEARCH ---
   searchContainer: { 
     flexDirection: 'row', 
     marginBottom: 20,
@@ -312,7 +295,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF', 
     paddingHorizontal: 15,
     height: 50,
-    // Retro boxy style
     borderWidth: 2,
     borderColor: '#000',
     borderBottomWidth: 4,
@@ -336,7 +318,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 4,
     borderRightWidth: 4,
   },
-
   listWrapper: {
     flex: 1, 
     minHeight: 0, 
@@ -344,13 +325,10 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 40
   },
-  
-  // --- RETRO CARD ---
   card: {
     backgroundColor: '#FFF',
     padding: 16,
     marginBottom: 20,
-    // The "Brutalist" Box Look
     borderWidth: 2,
     borderColor: '#000',
     borderBottomWidth: 6,
@@ -415,7 +393,6 @@ const styles = StyleSheet.create({
     fontFamily: THEME.font,
     textTransform: 'uppercase'
   },
-
   emptyState: {
     alignItems: 'center',
     marginTop: 60
@@ -427,17 +404,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontFamily: THEME.font
   },
-  emptySubText: {
-    fontSize: 14,
-    color: '#000',
-    marginTop: 4,
-    fontFamily: THEME.font
-  },
-
-  // --- RETRO MODAL ---
   modalOverlay: {
     flex: 1, 
-    backgroundColor: 'rgba(0,0,0,0.6)', // Darker dim
+    backgroundColor: 'rgba(0,0,0,0.6)', 
     justifyContent: 'flex-end', 
   },
   modalContent: {
@@ -486,14 +455,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderWidth: 2,
     borderColor: '#000',
-    // Slight shadow for inactive chips
     borderBottomWidth: 4,
     borderRightWidth: 4,
   },
   chipActive: {
     backgroundColor: '#000', 
     borderColor: '#000',
-    // Flatten active chips to look "pressed"
     borderBottomWidth: 2,
     borderRightWidth: 2,
     transform: [{translateY: 2}, {translateX: 2}]
