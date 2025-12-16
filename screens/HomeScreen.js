@@ -122,8 +122,8 @@ export default function HomeScreen({ navigation }) {
         {/* --- HEADER --- */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>GTS_PORTAL_V1</Text>
-            <Text style={styles.headerSubtitle}>{'>'} ACCESSING ACADEMIC DATABASE_</Text>
+            <Text style={styles.headerTitle}>GTS</Text>
+            <Text style={styles.headerSubtitle}>{'>'} ACCESSING ACADEMIC DATABASE</Text>
           </View>
           <View style={styles.avatarContainer}>
              <Ionicons name="person" size={20} color="#000" />
