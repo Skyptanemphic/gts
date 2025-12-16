@@ -45,7 +45,7 @@ export default function App() {
         <Stack.Screen 
           name="Home" 
           component={HomeScreen} 
-          options={{ title: "GTS_TERMINAL_V1" }}
+          options={{ title: "GTS" }}
         />
         
         <Stack.Screen 
