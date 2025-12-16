@@ -26,7 +26,8 @@ const THEME = {
   font: Platform.OS === 'ios' ? 'Courier' : 'monospace', // Typewriter feel
 };
 
-export default function HomeScreen() {
+// 1. ADDED 'navigation' PROP HERE
+export default function HomeScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [theses, setTheses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ export default function HomeScreen() {
   const fetchTheses = async () => {
     setLoading(true);
     try {
+      // ENSURE THIS IP MATCHES YOUR SERVER
       let url = `http://10.225.126.1:3000/api/theses?`;
       if (searchText) url += `search=${encodeURIComponent(searchText)}&`;
       if (selectedType !== 'All') url += `type=${encodeURIComponent(selectedType)}&`;
@@ -66,43 +68,49 @@ export default function HomeScreen() {
 
   // --- LIST ITEM COMPONENT ---
   const renderThesisItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.badgeContainer}>
-            {/* Retro Badge: Boxy with border */}
-            <View style={[styles.badge, { backgroundColor: THEME.accent }]}>
-                <Text style={[styles.badgeText, { color: '#FFF' }]}>{item.type}</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: '#FFF', borderWidth: 2 }]}>
-                <Text style={[styles.badgeText, { color: '#000' }]}>{item.language_name}</Text>
-            </View>
-        </View>
-        <Text style={styles.yearText}>[{item.year}]</Text>
-      </View>
-
-      <Text style={styles.cardTitle}>{item.title.toUpperCase()}</Text>
-      
-      {/* Dashed Line Divider Simulation */}
-      <View style={styles.cardDivider}>
-        <Text numberOfLines={1} ellipsizeMode="clip" style={{color: THEME.border, letterSpacing: 3}}>
-          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        </Text>
-      </View>
-
-      <View style={styles.cardFooter}>
-        <View style={styles.metaRow}>
-          <Ionicons name="person" size={16} color="black" />
-          <Text style={styles.metaText}>{item.author_name}</Text>
-        </View>
-        
-        {item.university_name && (
-          <View style={styles.metaRow}>
-              <Ionicons name="business" size={16} color="black" />
-              <Text style={styles.metaText} numberOfLines={1}>{item.university_name}</Text>
+    // 2. ADDED TOUCHABLE WRAPPER FOR NAVIGATION
+    <TouchableOpacity 
+      activeOpacity={0.9}
+      onPress={() => navigation.navigate('ThesisDetail', { thesis: item })}
+    >
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.badgeContainer}>
+              {/* Retro Badge: Boxy with border */}
+              <View style={[styles.badge, { backgroundColor: THEME.accent }]}>
+                  <Text style={[styles.badgeText, { color: '#FFF' }]}>{item.type}</Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: '#FFF', borderWidth: 2 }]}>
+                  <Text style={[styles.badgeText, { color: '#000' }]}>{item.language_name}</Text>
+              </View>
           </View>
-        )}
+          <Text style={styles.yearText}>[{item.year}]</Text>
+        </View>
+
+        <Text style={styles.cardTitle}>{item.title.toUpperCase()}</Text>
+        
+        {/* Dashed Line Divider Simulation */}
+        <View style={styles.cardDivider}>
+          <Text numberOfLines={1} ellipsizeMode="clip" style={{color: THEME.border, letterSpacing: 3}}>
+            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          </Text>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <View style={styles.metaRow}>
+            <Ionicons name="person" size={16} color="black" />
+            <Text style={styles.metaText}>{item.author_name}</Text>
+          </View>
+          
+          {item.university_name && (
+            <View style={styles.metaRow}>
+                <Ionicons name="business" size={16} color="black" />
+                <Text style={styles.metaText} numberOfLines={1}>{item.university_name}</Text>
+            </View>
+          )}
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
