@@ -9,8 +9,8 @@ export function AuthProvider({ children }) {
   // --- LOGIN ---
   const login = async (email, password) => {
     try {
-      // REPLACE WITH YOUR IP ADDRESS
-      const response = await fetch('http://10.225.126.1:3000/api/login', {
+      // REPLACE IP
+      const response = await fetch('http://192.168.1.93:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -18,47 +18,56 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (data.success) {
-        setUser(data.user);
+        // Ensure we map the ID correctly. Backend sends { user_id, full_name ... }
+        // We want to store it as { id, name ... } for frontend consistency
+        setUser({
+            id: data.user.user_id,
+            name: data.user.full_name,
+            role: data.user.role,
+            email: data.user.email
+        });
         return true;
       } else {
+        Alert.alert("Error", data.message);
         return false;
       }
     } catch (error) {
-      console.error("Login Error:", error);
-      Alert.alert("ERROR", "CONNECTION FAILED");
+      console.error(error);
+      Alert.alert("Error", "Connection failed");
       return false;
     }
   };
 
-  // --- REGISTER (NEW) ---
-  const register = async (fullName, email, password, role) => {
+  // --- REGISTER ---
+  const register = async (fullName, email, password, role, professorTitle = null) => {
     try {
-      // REPLACE WITH YOUR IP ADDRESS
-      const response = await fetch('http://10.225.126.1:3000/api/register', {
+      const response = await fetch('http://192.168.1.93:3000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: fullName, email, password, role }),
+        body: JSON.stringify({ full_name: fullName, email, password, role, professor_title: professorTitle }),
       });
       
       const data = await response.json();
 
       if (data.success) {
-        setUser(data.user); // Auto-login after register
+        setUser({
+            id: data.user.user_id,
+            name: data.user.full_name,
+            role: data.user.role,
+            email: data.user.email
+        });
         return true;
       } else {
-        Alert.alert("REGISTRATION FAILED", data.message || "Unknown Error");
+        Alert.alert("Register Failed", data.message);
         return false;
       }
     } catch (error) {
-      console.error("Register Error:", error);
-      Alert.alert("ERROR", "CONNECTION FAILED");
-      return false;
+        Alert.alert("Error", "Connection failed");
+        return false;
     }
   };
 
-  const logout = () => {
-    setUser(null);
-  };
+  const logout = () => setUser(null);
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
