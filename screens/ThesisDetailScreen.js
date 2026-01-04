@@ -13,7 +13,8 @@ const THEME = {
 };
 
 export default function ThesisDetailScreen({ navigation, route }) {
-  const { thesis } = route.params; 
+  // Safety check: ensure thesis exists to prevent crashes
+  const thesis = route.params?.thesis || {}; 
 
   const InfoRow = ({ icon, label, value }) => (
     <View style={styles.infoRow}>
@@ -29,25 +30,36 @@ export default function ThesisDetailScreen({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={THEME.primary} />
       
-      {/* --- NEW CUSTOM HEADER --- */}
+      {/* Header */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.topBarTitle}>Thesis Details</Text>
-        <View style={{width: 24}} /> {/* Dummy view to center title */}
+        <View style={{width: 24}} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} style={{flex: 1}}>
+      {/* FIX APPLIED:
+         1. style={{ flex: 1 }} -> Ensures ScrollView takes available space.
+         2. contentContainerStyle={{ flexGrow: 1 }} -> Ensures content fills height even if short.
+         3. alwaysBounceVertical -> Forces scroll simulation on iOS even if content is short.
+      */}
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+        alwaysBounceVertical={true} 
+        overScrollMode="always" // Android bounce effect
+      >
         <View style={styles.headerCard}>
           <View style={styles.badges}>
-            <View style={styles.typeBadge}><Text style={styles.badgeText}>{thesis.type}</Text></View>
-            <View style={styles.langBadge}><Text style={styles.langText}>{thesis.language_name}</Text></View>
+            <View style={styles.typeBadge}><Text style={styles.badgeText}>{thesis.type || 'THESIS'}</Text></View>
+            <View style={styles.langBadge}><Text style={styles.langText}>{thesis.language_name || 'English'}</Text></View>
           </View>
-          <Text style={styles.title}>{thesis.title}</Text>
+          <Text style={styles.title}>{thesis.title || 'Untitled Thesis'}</Text>
           <View style={styles.metaContainer}>
-            <View style={styles.metaItem}><Ionicons name="calendar-outline" size={14} color={THEME.textSecondary} /><Text style={styles.metaText}>{thesis.year}</Text></View>
-            <View style={styles.metaItem}><Ionicons name="document-text-outline" size={14} color={THEME.textSecondary} /><Text style={styles.metaText}>{thesis.num_pages || '?'} Pages</Text></View>
+            <View style={styles.metaItem}><Ionicons name="calendar-outline" size={14} color={THEME.textSecondary} /><Text style={styles.metaText}>{thesis.year || 'N/A'}</Text></View>
+            <View style={styles.metaItem}><Ionicons name="document-text-outline" size={14} color={THEME.textSecondary} /><Text style={styles.metaText}>{thesis.num_pages ? `${thesis.num_pages} Pages` : 'Pages N/A'}</Text></View>
           </View>
         </View>
 
@@ -74,9 +86,13 @@ export default function ThesisDetailScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: THEME.bg, ...(Platform.OS === 'web' ? { height: '100vh', overflow: 'hidden' } : {}) },
+  // FIX: On Android, SafeAreaView is just a View. We ensure it fills the screen.
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: THEME.bg,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 
+  },
   
-  // Header Styles
   topBar: {
     backgroundColor: THEME.primary,
     height: 60,
@@ -84,12 +100,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 10 : 0,
   },
   topBarTitle: { color: '#FFF', fontSize: 18, fontWeight: '700' },
   backBtn: { padding: 4 },
 
-  content: { padding: 16, paddingBottom: 40 },
+  // FIX: Explicit style for ScrollView to take remaining space
+  scrollView: {
+    flex: 1, 
+    width: '100%',
+  },
+  // FIX: Increased paddingBottom to 100 to clear any Bottom Tab Bars
+  scrollContent: { 
+    padding: 16, 
+    paddingBottom: 100, 
+    flexGrow: 1 
+  },
+
   headerCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 20, marginBottom: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 3 },
   badges: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   typeBadge: { backgroundColor: '#E3F2FD', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },

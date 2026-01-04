@@ -122,7 +122,7 @@ export default function HomeScreen({ navigation }) {
       {/* FIXED TOP BAR */}
       <View style={styles.topBar}>
         <View>
-          <Text style={styles.headerTitle}>GTS Portal</Text>
+          <Text style={styles.headerTitle}>GTS Project</Text>
           <Text style={styles.headerSubtitle}>
              {user ? `Welcome, ${user.name}` : 'Thesis Database'}
           </Text>
